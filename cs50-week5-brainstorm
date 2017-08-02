@@ -6,10 +6,33 @@ typedef struct trieNode
 }
 trieNode;
 
-inputWordArray[6] = Mason
 
-#Used determine what position corresponds to what letter in the array e.g. 0=a, 1=b, 2=c, etc.
-array position = inputWordArray[x] - 97
+int asciiToIndex(char)
+
+#inputWordArray[6] = Mason
+trieNode* rootTrieNode = (trieNode*)malloc(1);
+
+
+trieNode* currentTrieNode = rootTrieNode;
+trieNode* newTrieNode = NULL;
+
+for (int x = 0; x < strlen(inputWordArray); x++)
+{
+	arrayPosition = asciiToIndex(inputWordArray[x])
+	
+	if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
+	{
+		newTrieNode = (trieNode*)malloc(1)
+		currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode
+		
+		if (strlen(inputWordArray) - x == 2)
+		{
+			newTrieNode->isWord = True
+		}
+	}
+	currentTrieNode = newTrieNode
+	newTrieNode = NULL
+}
 
 
 int asciiToIndex(char letter)
