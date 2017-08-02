@@ -1,37 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+
 typedef struct trieNode
 {
 	trieNode* trieNodeArr[26] = {NULL};
 	bool isWord = false;
 	
-}
-trieNode;
+} trieNode;
 
+void trieWordInsert (char [], trieNode*);
+int asciiToIndex(char);
 
-int asciiToIndex(char)
-
-#inputWordArray[6] = Mason
-trieNode* rootTrieNode = (trieNode*)malloc(1);
-
-
-trieNode* currentTrieNode = rootTrieNode;
-trieNode* newTrieNode = NULL;
-
-for (int x = 0; x < strlen(inputWordArray); x++)
+int main(void)
 {
-	arrayPosition = asciiToIndex(inputWordArray[x])
-	
-	if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
+
+trieNode* rootTrieNode = (trieNode*)malloc(1);
+trieNode* currentTrieNode = rootTrieNode;
+
+}
+
+bool trieWordSearch(char inputWordArray[], trieNode* currentTrieNode)
+{
+	for (int x = 0; x < strlen(inputWordArray); x++)
 	{
-		newTrieNode = (trieNode*)malloc(1)
-		currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode
+		arrayPosition = asciiToIndex(inputWordArray[x]);
 		
-		if (strlen(inputWordArray) - x == 2)
+		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL &&
+		    currentTrieNode->isWord == false)
+			{
+				return false;
+			}
+		else if (currentTrieNode->isWord == false)
+			{
+				currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+			}
+		else if (currentTrieNode->trieNodeArr[arrayPosition] == NULL &&
+		    currentTrieNode->isWord == true)
+			{
+				return True;
+			}
+		
+	}
+	return false;
+}
+
+void trieWordInsert(char inputWordArray[], trieNode* currentTrieNode)
+{
+
+	trieNode* newTrieNode = NULL;
+	
+	for (int x = 0; x < strlen(inputWordArray); x++)
+	{
+		arrayPosition = asciiToIndex(inputWordArray[x]);
+		
+		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
 		{
-			newTrieNode->isWord = True
+			newTrieNode = (trieNode*)malloc(1);
+			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
+			
+			if (strlen(inputWordArray) - x == 2)
+			{
+				newTrieNode->isWord = True;
+			}
+			currentTrieNode = newTrieNode;
+			newTrieNode = NULL;
+		}
+		else
+		{
+			currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+			
+			if (strlen(inputWordArray) - x == 2)
+			{
+				currentTrieNode->isWord = True;
+			}
 		}
 	}
-	currentTrieNode = newTrieNode
-	newTrieNode = NULL
 }
 
 
@@ -39,8 +84,9 @@ int asciiToIndex(char letter)
 {
 	if (isupper(letter))
 	{
-		letter = tolower(letter)
+		letter = tolower(letter);
+		letter = atoi(letter);
 	}
 	
-	return letter - 97
+	return letter - 97;
 }
