@@ -23,27 +23,24 @@ trieNode* currentTrieNode = rootTrieNode;
 
 bool trieWordSearch(char inputWordArray[], trieNode* currentTrieNode)
 {
-	for (int x = 0; x < strlen(inputWordArray); x++)
+	for (int x = 0; x < strlen(inputWordArray) - 1; x++)
 	{
-		arrayPosition = asciiToIndex(inputWordArray[x]);
+		int arrayPosition = asciiToIndex(inputWordArray[x]);
 		
 		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL &&
-		    currentTrieNode->isWord == false)
-			{
-				return false;
-			}
-		else if (currentTrieNode->isWord == false)
-			{
-				currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
-			}
-		else if (currentTrieNode->trieNodeArr[arrayPosition] == NULL &&
 		    currentTrieNode->isWord == true)
 			{
 				return True;
 			}
-		
+		else if (currentTrieNode->trieNodeArr[arrayPosition] != NULL)
+			{
+				currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+			}
+		else
+			{
+				return False;
+			}
 	}
-	return false;
 }
 
 void trieWordInsert(char inputWordArray[], trieNode* currentTrieNode)
@@ -51,9 +48,9 @@ void trieWordInsert(char inputWordArray[], trieNode* currentTrieNode)
 
 	trieNode* newTrieNode = NULL;
 	
-	for (int x = 0; x < strlen(inputWordArray); x++)
+	for (int x = 0; x < strlen(inputWordArray)-1; x++)
 	{
-		arrayPosition = asciiToIndex(inputWordArray[x]);
+		int arrayPosition = asciiToIndex(inputWordArray[x]);
 		
 		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
 		{
@@ -71,7 +68,7 @@ void trieWordInsert(char inputWordArray[], trieNode* currentTrieNode)
 		{
 			currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
 			
-			if (strlen(inputWordArray) - x == 2)
+			if (strlen(inputWordArray) - x == 1)
 			{
 				currentTrieNode->isWord = True;
 			}
