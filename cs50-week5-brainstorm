@@ -1,3 +1,9 @@
+/* Still need to work on figuring out why
+   'else' statement used to iterate through
+   existing nodes is not working
+*/
+   
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,6 +15,7 @@ const int ALPHABET_SIZE = 26;
 
 typedef struct Node 
 {
+	struct Node* parentNode;
 	struct Node* trieNodeArr[ALPHABET_SIZE];
 	bool isWord;
 	
@@ -16,41 +23,93 @@ typedef struct Node
 
 void trieWordInsert (char *inputWordArray, trieNode*);
 bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode);
-void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode);
 int asciiToIndex(char);
 
 int main(void)
 {
 
-	trieNode* rootTrieNode = (trieNode*)malloc(1);
+	trieNode* rootTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+	
+	rootTrieNode->parentNode = NULL;
+	rootTrieNode->isWord = false;
 	for (int x = 0; x < ALPHABET_SIZE; x++)
 	{
 		rootTrieNode->trieNodeArr[x] = NULL;
 	}
 
-	trieNode* currentTrieNode = rootTrieNode;
+	char wordTest1[9] = {'j','o','n','a','t','h','a','n'};
+	char wordTest2[4] = {'j','o','n'};
+	trieWordInsert(wordTest1, rootTrieNode);
+	trieWordInsert(wordTest2, rootTrieNode);
+	bool wordStatus1 = trieWordSearch(wordTest1, rootTrieNode);
+	bool wordStatus2 = trieWordSearch(wordTest2, rootTrieNode);
 
+	printf("Word Status1:%i\n", wordStatus1);
+	printf("Word Status2:%i\n", wordStatus2);
+	
 
-	char wordTest[3] = {'j','o'};
-	trieWordInsert(wordTest, currentTrieNode);
-	bool wordStatus = trieWordSearch(wordTest, currentTrieNode);
-
-	printf("%i\n", wordStatus);
-	printf("%lu\n", strlen(wordTest));
-
-	free(currentTrieNode);
+	free(rootTrieNode);
 
 	return 0;
 
 }
 
-bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
+
+void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 {
-	for (int x = 0; x < strlen(inputWordArray) - 1; x++)
+
+	trieNode *newTrieNode = NULL;
+	
+	for (int x = 0; x < strlen(inputWordArray); x++)
 	{
 		int arrayPosition = asciiToIndex(inputWordArray[x]);
 		
-		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL &&
+		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
+		{
+			newTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+			
+			//Initialize values for newTrieNode
+			newTrieNode->parentNode = currentTrieNode;
+			newTrieNode->isWord = false;
+			for (int y = 0; y < ALPHABET_SIZE - 1; y++)
+			{
+				newTrieNode->trieNodeArr[y] = NULL;
+			}
+			
+			//Set the pointer value in currentNode at yth index to the
+			//location of newTrieNode
+			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
+			
+			if (strlen(inputWordArray) - x == 1)
+			{
+			currentTrieNode->isWord = true;
+			break;
+			}
+			
+			currentTrieNode = newTrieNode;
+		}
+		
+		else
+		{
+
+			currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+			
+			if (strlen(inputWordArray) - x == 1)
+			{
+			currentTrieNode->isWord = true;
+			}
+		}
+	}
+}
+
+
+bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
+{
+	for (int x = 0; x < strlen(inputWordArray); x++)
+	{
+		int arrayPosition = asciiToIndex(inputWordArray[x]);
+		
+		if (strlen(inputWordArray) - x == 1 &&
 		    currentTrieNode->isWord == true)
 			{
 				return true;
@@ -67,53 +126,6 @@ bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
 	return false;
 }
 
-void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
-{
-
-	trieNode *newTrieNode = NULL;
-	
-	for (int x = 0; x < strlen(inputWordArray) - 1; x++)
-	{
-		int arrayPosition = asciiToIndex(inputWordArray[x]);
-		
-		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
-		{
-			newTrieNode = (trieNode*)malloc(1);
-			
-			for (int y = 0; y < ALPHABET_SIZE; y++)
-			{
-				newTrieNode->trieNodeArr[y] = NULL;
-			}
-			
-			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
-			
-			if (strlen(inputWordArray) - x == 1)
-			{
-				newTrieNode->isWord = true;
-			}
-			currentTrieNode = newTrieNode;
-			newTrieNode = NULL;
-		}
-		else
-		{
-			currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
-			
-			if (strlen(inputWordArray) - x == 1)
-			{
-				currentTrieNode->isWord = true;
-			}
-		}
-	}
-	if (currentTrieNode == newTrieNode)
-	{
-		free(currentTrieNode);
-	}
-	else
-	{
-		free(newTrieNode);
-	}
-	
-}
 
 int asciiToIndex(char letter)
 {
