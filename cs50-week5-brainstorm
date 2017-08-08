@@ -7,7 +7,8 @@
 
 const int ALPHABET_SIZE = 26;
 
-typedef struct Node {
+typedef struct Node 
+{
 	struct Node* trieNodeArr[ALPHABET_SIZE];
 	bool isWord;
 	
@@ -21,20 +22,25 @@ int asciiToIndex(char);
 int main(void)
 {
 
-trieNode* rootTrieNode = (trieNode*)malloc(1);
-trieNode* currentTrieNode = rootTrieNode;
+	trieNode* rootTrieNode = (trieNode*)malloc(1);
+	for (int x = 0; x < ALPHABET_SIZE; x++)
+	{
+		rootTrieNode->trieNodeArr[x] = NULL;
+	}
+
+	trieNode* currentTrieNode = rootTrieNode;
 
 
-char wordTest[3] = {'j','o'};
-trieWordInsert(wordTest, currentTrieNode);
-bool wordStatus = trieWordSearch(wordTest, currentTrieNode);
+	char wordTest[3] = {'j','o'};
+	trieWordInsert(wordTest, currentTrieNode);
+	bool wordStatus = trieWordSearch(wordTest, currentTrieNode);
 
-printf("%i\n", wordStatus);
-printf("%lu\n", strlen(wordTest));
+	printf("%i\n", wordStatus);
+	printf("%lu\n", strlen(wordTest));
 
-free(currentTrieNode);
+	free(currentTrieNode);
 
-return 0;
+	return 0;
 
 }
 
@@ -73,6 +79,12 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
 		{
 			newTrieNode = (trieNode*)malloc(1);
+			
+			for (int x = 0; x < ALPHABET_SIZE; x++)
+			{
+				newTrieNode->trieNodeArr[x] = NULL;
+			}
+			
 			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
 			
 			if (strlen(inputWordArray) - x == 1)
