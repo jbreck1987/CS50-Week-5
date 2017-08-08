@@ -80,9 +80,9 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 		{
 			newTrieNode = (trieNode*)malloc(1);
 			
-			for (int x = 0; x < ALPHABET_SIZE; x++)
+			for (int y = 0; y < ALPHABET_SIZE; y++)
 			{
-				newTrieNode->trieNodeArr[x] = NULL;
+				newTrieNode->trieNodeArr[y] = NULL;
 			}
 			
 			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
