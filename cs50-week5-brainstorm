@@ -83,11 +83,11 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 			//Set the pointer value in currentNode at yth index to the
 			//location of newTrieNode
 			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
-		
 			
 			//On the last letter in the input
 			//word array, break out of loop instead
 			//of iterating through the newly created node
+			//Set the isWord value to true on last node
 			if (strlen(inputWordArray) - x == 1)
 			{
 			currentTrieNode->isWord = true;
@@ -95,12 +95,15 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 			}
 			
 			currentTrieNode = newTrieNode;
-
 		}
 		
 		
 		else
 		{
+			//On the last letter in the input
+			//word array, break out of loop instead
+			//of iterating through the newly created node.
+			//Set the isWord value to true on last node
 			if (strlen(inputWordArray) - x == 1)
 			{
 			currentTrieNode->isWord = true;
