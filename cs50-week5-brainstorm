@@ -1,8 +1,3 @@
-/* Need to create a delete function
-   so that I quit wasting memory :)
-*/
-   
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -22,6 +17,7 @@ typedef struct Node
 
 void trieWordInsert(char *inputWordArray, trieNode*);
 bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode);
+void trieUnload(trieNode* initNode);
 int asciiToIndex(char);
 
 int main(void)
@@ -36,8 +32,8 @@ int main(void)
 		rootTrieNode->trieNodeArr[x] = NULL;
 	}
 
-	char wordTest1[9] = {'j','o','n','a','t','h','a','n'};
-	char wordTest2[4] = {'j','o','n'};
+	char wordTest1[4] = {'j','o','n'};
+	char wordTest2[4] = {'b','o','b'};
 	
 	trieWordInsert(wordTest1, rootTrieNode);
 	trieWordInsert(wordTest2, rootTrieNode);
@@ -48,8 +44,8 @@ int main(void)
 	printf("Word Status1:%i\n", wordStatus1);
 	printf("Word Status2:%i\n", wordStatus2);
 	
-
-	free(rootTrieNode);
+	trieUnload(rootTrieNode);
+	// free(rootTrieNode);
 
 	return 0;
 
@@ -139,6 +135,28 @@ bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
 	return false;
 }
 
+void trieUnload(trieNode* initNode)
+{
+	for (int x = 0; x < ALPHABET_SIZE; x++)
+	{
+		if (initNode->trieNodeArr[x] == NULL && initNode->isWord == false)
+		{
+			// do nothing, continue iteration.
+			// "continue" keyword does not work here
+			// as it will skip the if block that
+			// frees the empty node
+		}
+		else if (initNode->trieNodeArr[x] != NULL)
+		{
+			trieUnload(initNode->trieNodeArr[x]);
+		}
+		
+		if (ALPHABET_SIZE - x == 1)
+		{
+			free(initNode);
+		}
+	}
+}
 
 int asciiToIndex(char letter)
 {
