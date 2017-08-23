@@ -1,0 +1,23 @@
+iterable = 0
+char tempString[LONGEST_WORD] = {0}
+
+while (c = fgetc(file)) not equal to EOF: //Loop until the end of the file is hit.
+	
+	//check to make sure line will not
+	//overflow the tempString array
+	**CODE TBD***
+	
+	//newline signifies end of word but do not want
+	//send newline char to Trie
+	if (c == newline delimiter):
+		tempString[iterable] = array delimiter
+		trieNodeInsert(rootNode, tempString)
+		
+		//reset iterable and tempString to 0 to
+		//prep for next word (next line).
+		iterable = 0
+		tempString = {0}
+	
+	else:
+		tempString[iterable] = c
+		iterable++
