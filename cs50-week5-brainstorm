@@ -1,23 +1,169 @@
-typedef struct trieNode
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <stddef.h>
+#include <string.h>
+
+const int ALPHABET_SIZE = 26;
+
+typedef struct Node 
 {
-	trieNode* trieNodeArr[26] = {NULL};
-	bool isWord = false;
+	struct Node* parentNode;
+	struct Node* trieNodeArr[ALPHABET_SIZE];
+	bool isWord;
 	
+} trieNode;
+
+void trieWordInsert(char *inputWordArray, trieNode*);
+bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode);
+void trieUnload(trieNode* initNode);
+int asciiToIndex(char);
+
+int main(void)
+{
+
+	trieNode* rootTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+	
+	rootTrieNode->parentNode = NULL;
+	rootTrieNode->isWord = false;
+	for (int x = 0; x < ALPHABET_SIZE; x++)
+	{
+		rootTrieNode->trieNodeArr[x] = NULL;
+	}
+
+	char wordTest1[4] = {'j','o','n'};
+	char wordTest2[4] = {'b','o','b'};
+	
+	trieWordInsert(wordTest1, rootTrieNode);
+	trieWordInsert(wordTest2, rootTrieNode);
+	
+	bool wordStatus1 = trieWordSearch(wordTest1, rootTrieNode);
+	bool wordStatus2 = trieWordSearch(wordTest2, rootTrieNode);
+
+	printf("Word Status1:%i\n", wordStatus1);
+	printf("Word Status2:%i\n", wordStatus2);
+	
+	trieUnload(rootTrieNode);
+	// free(rootTrieNode);
+
+	return 0;
+
 }
-trieNode;
 
-inputWordArray[6] = Mason
 
-#Used determine what position corresponds to what letter in the array e.g. 0=a, 1=b, 2=c, etc.
-array position = inputWordArray[x] - 97
+void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
+{
+	trieNode *newTrieNode = NULL;
+	
+	for (int x = 0; x < strlen(inputWordArray); x++)
+	{
+		int arrayPosition = asciiToIndex(inputWordArray[x]);
+		
+		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
+		{
+			newTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+			
+			//Initialize values for newTrieNode
+			newTrieNode->parentNode = currentTrieNode;
+			newTrieNode->isWord = false;
+			
+			//Iterate over newly created array with the
+			//newly allocated trie node and set all values
+			//to NULL
+			for (int y = 0; y < ALPHABET_SIZE - 1; y++)
+			{
+				newTrieNode->trieNodeArr[y] = NULL;
+			}
+			
+			//Set the pointer value in currentNode at yth index to the
+			//location of newTrieNode
+			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
+			
+			//On the last letter in the input
+			//word array, break out of loop instead
+			//of iterating through the newly created node
+			//Set the isWord value to true on last node
+			if (strlen(inputWordArray) - x == 1)
+			{
+			currentTrieNode->isWord = true;
+			break;
+			}
+			
+			currentTrieNode = newTrieNode;
+		}
+		
+		
+		else
+		{
+			//On the last letter in the input
+			//word array, break out of loop instead
+			//of iterating through the newly created node.
+			//Set the isWord value to true on last node
+			if (strlen(inputWordArray) - x == 1)
+			{
+			currentTrieNode->isWord = true;
+			break;
+			}
+			
+			currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+		}
+	}
+}
 
+
+bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
+{
+	for (int x = 0; x < strlen(inputWordArray); x++)
+	{
+		int arrayPosition = asciiToIndex(inputWordArray[x]);
+		
+		if (strlen(inputWordArray) - x == 1 &&
+		    currentTrieNode->isWord == true)
+			{
+				return true;
+			}
+		else if (currentTrieNode->trieNodeArr[arrayPosition] != NULL)
+			{
+				currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
+			}
+		else
+			{
+				return false;
+			}
+	}
+	return false;
+}
+
+void trieUnload(trieNode* initNode)
+{
+	for (int x = 0; x < ALPHABET_SIZE; x++)
+	{
+		if (initNode->trieNodeArr[x] == NULL && initNode->isWord == false)
+		{
+			// do nothing, continue iteration.
+			// "continue" keyword does not work here
+			// as it will skip the if block that
+			// frees the empty node
+		}
+		else if (initNode->trieNodeArr[x] != NULL)
+		{
+			trieUnload(initNode->trieNodeArr[x]);
+		}
+		
+		if (ALPHABET_SIZE - x == 1)
+		{
+			free(initNode);
+		}
+	}
+}
 
 int asciiToIndex(char letter)
 {
 	if (isupper(letter))
 	{
-		letter = tolower(letter)
+		letter = tolower(letter);
 	}
 	
-	return letter - 97
+	return (int)letter - 97;
 }
