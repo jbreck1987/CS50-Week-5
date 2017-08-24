@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <ctype.h>
-#include <stddef.h>
 #include <string.h>
 
-const int ALPHABET_SIZE = 26;
+const int ALPHABET_SIZE = 126;
+const int LONGEST_WORD = 45;
 
 typedef struct Node 
 {
@@ -15,75 +14,129 @@ typedef struct Node
 	
 } trieNode;
 
-void trieWordInsert(char *inputWordArray, trieNode*);
-bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode);
-void trieUnload(trieNode* initNode);
-int asciiToIndex(char);
+void trieWordInsert(char*, trieNode*);
+bool trieWordSearch(char*, trieNode*);
+bool loadDictionary(trieNode*, char*);
+void trieUnload(trieNode*);
 
-int main(void)
+
+int main(int argc, char* argv[])
 {
 
-	trieNode* rootTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+	trieNode* rootTrieNode = (trieNode*)calloc(1, sizeof(trieNode));
 	
-	rootTrieNode->parentNode = NULL;
-	rootTrieNode->isWord = false;
-	for (int x = 0; x < ALPHABET_SIZE; x++)
+	bool loaded = loadDictionary(rootTrieNode, argv[1]);
+	if (loaded == false)
 	{
-		rootTrieNode->trieNodeArr[x] = NULL;
+		free(rootTrieNode);
+		return 1;
 	}
-
-	char wordTest1[4] = {'j','o','n'};
-	char wordTest2[4] = {'b','o','b'};
 	
-	trieWordInsert(wordTest1, rootTrieNode);
-	trieWordInsert(wordTest2, rootTrieNode);
-	
-	bool wordStatus1 = trieWordSearch(wordTest1, rootTrieNode);
-	bool wordStatus2 = trieWordSearch(wordTest2, rootTrieNode);
+	bool wordStatus1 = trieWordSearch(argv[2], rootTrieNode);
 
-	printf("Word Status1:%i\n", wordStatus1);
-	printf("Word Status2:%i\n", wordStatus2);
+	printf("Is \"%s\" a word?: ", argv[2]);
+	if (wordStatus1 == 1) { printf ("yes\n"); } else { printf("no\n"); }
 	
 	trieUnload(rootTrieNode);
-	// free(rootTrieNode);
 
 	return 0;
 
 }
 
-
-void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
+bool loadDictionary(trieNode* rootNode, char* dictionaryFile)
 {
-	trieNode *newTrieNode = NULL;
+	/*Usage: This function opens the dictionary file
+	containing all words that should be added
+	to the Trie structure and then loads the words
+	into the Trie structure
+	*/
+
+	int x = 0;
+	int c = 0;
+	char tempString[46] = {0};
+	
+	// attempt to open dictionary filename
+	// that was passed to function
+	FILE* infile = fopen(dictionaryFile, "r");
+	if (infile == NULL)
+	{
+		fprintf(stderr, "Unable to open dictionary file \"%s\"\n", dictionaryFile);
+		return false;
+	}
+	
+	//Loop until the end of the file is hit.
+	while ((c = fgetc(infile)) != EOF)
+	{
+		
+		// check to make sure line will not
+		// overflow the tempString array.
+		// 46th char in the line must be newline,
+		// otherwise the word will be too long
+		if (x == LONGEST_WORD + 1 && c != '\n')
+		{
+			fprintf(stderr, "ERROR: word length exceeded max buffer; Current buffer size is %d.\n", LONGEST_WORD);
+			fclose(infile);
+			return false;
+		}
+
+		
+		// newline signifies end of word but do not want
+		// send newline char to Trie
+		if (c == '\n')
+		{
+			tempString[x] = '\0';
+			trieWordInsert(tempString, rootNode);
+			
+			// reset x and tempString to 0 to
+			// prep for next word (next line).
+			x = 0;
+			memset(tempString, 0, LONGEST_WORD);
+		}
+		
+		else
+		{
+			// build the word array based
+			// off the chars in the line
+			tempString[x] = c;
+			x++;
+		}
+	}
+	fclose(infile);
+	return true;
+}
+
+
+void trieWordInsert(char* inputWordArray, trieNode* currentTrieNode)
+{
+
+	/*Usage: This function builds the Trie structure,
+	one word at at time
+	*/
+	
+	trieNode* newTrieNode = NULL;
 	
 	for (int x = 0; x < strlen(inputWordArray); x++)
 	{
-		int arrayPosition = asciiToIndex(inputWordArray[x]);
+		// Returns the value of the char in
+		// index "x" as an int. This will be
+		// used to determine the index to check
+		// for the pointer in the trieNodeArr
+		int arrayPosition = inputWordArray[x];
 		
 		if (currentTrieNode->trieNodeArr[arrayPosition] == NULL)
 		{
-			newTrieNode = (trieNode*)malloc(1 * sizeof(trieNode));
+			// Since there is no Node for this char value
+			// in this branch, create a new one
+			newTrieNode = (trieNode*)calloc(1, sizeof(trieNode));
 			
-			//Initialize values for newTrieNode
-			newTrieNode->parentNode = currentTrieNode;
-			newTrieNode->isWord = false;
-			
-			//Iterate over newly created array with the
-			//newly allocated trie node and set all values
-			//to NULL
-			for (int y = 0; y < ALPHABET_SIZE - 1; y++)
-			{
-				newTrieNode->trieNodeArr[y] = NULL;
-			}
-			
-			//Set the pointer value in currentNode at yth index to the
-			//location of newTrieNode
+			// Set the pointer value in currentNode at yth index to the
+			// location of newTrieNode
 			currentTrieNode->trieNodeArr[arrayPosition] = newTrieNode;
 			
-			//On the last letter in the input
-			//word array, break out of loop instead
-			//of iterating through the newly created node
-			//Set the isWord value to true on last node
+			// On the last letter in the input
+			// word array, break out of loop instead
+			// of iterating through the newly created node
+			// Set the isWord value to true on last node
 			if (strlen(inputWordArray) - x == 1)
 			{
 			currentTrieNode->isWord = true;
@@ -96,10 +149,10 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 		
 		else
 		{
-			//On the last letter in the input
-			//word array, break out of loop instead
-			//of iterating through the newly created node.
-			//Set the isWord value to true on last node
+			// On the last letter in the input
+			// word array, break out of loop instead
+			// of iterating through the newly created node.
+			// Set the isWord value to true on last node
 			if (strlen(inputWordArray) - x == 1)
 			{
 			currentTrieNode->isWord = true;
@@ -112,17 +165,30 @@ void trieWordInsert(char *inputWordArray, trieNode *currentTrieNode)
 }
 
 
-bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
+bool trieWordSearch(char* inputWordArray, trieNode* currentTrieNode)
 {
+	/*Usage: This function searches the
+	previously built Trie structure for the
+	char array (word) that was passed into it
+	*/
+	
+	// iterate over char array (word) that was passed
+	// into function
 	for (int x = 0; x < strlen(inputWordArray); x++)
 	{
-		int arrayPosition = asciiToIndex(inputWordArray[x]);
+		int arrayPosition = inputWordArray[x];
 		
+		// Checks status of isWord on the last
+		// Trie node in the branch of the passed
+		// char array (word)
 		if (strlen(inputWordArray) - x == 1 &&
 		    currentTrieNode->isWord == true)
 			{
 				return true;
 			}
+		// Iterate through through the Trie node
+		// branch based on the value of the current
+		// index (x) in the char array (word)
 		else if (currentTrieNode->trieNodeArr[arrayPosition] != NULL)
 			{
 				currentTrieNode = currentTrieNode->trieNodeArr[arrayPosition];
@@ -135,35 +201,45 @@ bool trieWordSearch(char *inputWordArray, trieNode *currentTrieNode)
 	return false;
 }
 
+
 void trieUnload(trieNode* initNode)
 {
+	/*Usage: This function unloads the entire Trie
+	structure from memory
+	*/
+	
 	for (int x = 0; x < ALPHABET_SIZE; x++)
 	{
+		// The condition below signifies an empty branch
+		// for the xth index. Move on to next index value
+		// and check for a branch there.
 		if (initNode->trieNodeArr[x] == NULL && initNode->isWord == false)
 		{
 			// do nothing, continue iteration.
 			// "continue" keyword does not work here
 			// as it will skip the if block that
-			// frees the empty node
+			// frees the empty node since that
+			// if block is nested in the for
+			// loop.
 		}
+		
+		// If the xth index is not null, indicates
+		// that there is a branch for this index.
+		// Recursively search through that branch
+		// and clean up any branches the child nodes
+		// may have.
 		else if (initNode->trieNodeArr[x] != NULL)
 		{
 			trieUnload(initNode->trieNodeArr[x]);
 		}
 		
+		// If the xth index is the last index
+		// in the array, it must mean all previous
+		// indeces have had all of their branches
+		// deleted. Delete this node.
 		if (ALPHABET_SIZE - x == 1)
 		{
 			free(initNode);
 		}
 	}
-}
-
-int asciiToIndex(char letter)
-{
-	if (isupper(letter))
-	{
-		letter = tolower(letter);
-	}
-	
-	return (int)letter - 97;
 }
