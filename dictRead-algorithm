@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+const int LONGEST_WORD = 45;
+
+
+int main(void)
+
+{
+	
+	int x = 0;
+	int c = 0;
+	char tempString[46] = {0};
+	
+	FILE* infile = fopen("dict.txt", "r");
+	if (infile == NULL)
+	{
+		fprintf(stderr, "Unable to open file\n");
+		return 1;
+	}
+	
+	while ((c = fgetc(infile)) != EOF) //Loop until the end of the file is hit.
+	{
+		
+		// check to make sure line will not
+		// overflow the tempString array
+		// 46th char in the line must be newline,
+		// otherwise the word will be too long
+		if (x == LONGEST_WORD + 1 && c != '\n')
+		{
+			fprintf(stderr, "ERROR: word length exceeded max buffer; Current buffer size is %d.\n", LONGEST_WORD);
+			break;
+		}
+
+		
+		// newline signifies end of word but do not want
+		// send newline char to Trie
+		if (c == '\n')
+		{
+			tempString[x] = '\0';
+			// trieNodeInsert(rootNode, tempString)
+			
+			// reset x and tempString to 0 to
+			// prep for next word (next line).
+			x = 0;
+			memset(tempString, 0, LONGEST_WORD);
+		}
+		
+		else
+		{
+			// build the word array based
+			// off the chars in the line
+			tempString[x] = c;
+			x++;
+		}
+	}
+	fclose(infile);
+	return 0;
+}
